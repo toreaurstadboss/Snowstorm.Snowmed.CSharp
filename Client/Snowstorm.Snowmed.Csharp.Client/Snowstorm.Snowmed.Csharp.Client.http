@@ -1,6 +1,19 @@
-@Snowstorm.Snowmed.Csharp.Client_HostAddress = http://localhost:5193
+@host = http://localhost:5193
 
-GET {{Snowstorm.Snowmed.Csharp.Client_HostAddress}}/weatherforecast/
+### Search concepts by name
+GET {{host}}/api/concepts?term=diabetes
+Accept: application/json
+
+###
+
+### Search for hypertension
+GET {{host}}/api/concepts?term=hypertension
+Accept: application/json
+
+###
+
+### A missing term returns 400 Bad Request
+GET {{host}}/api/concepts
 Accept: application/json
 
 ###

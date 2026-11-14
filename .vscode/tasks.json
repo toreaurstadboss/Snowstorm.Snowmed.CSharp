@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Test: Snowstorm integration tests",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "Client\\Snowstorm.Snowmed.Csharp.Client.Tests\\Snowstorm.Snowmed.Csharp.Client.Tests.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "Requires Snowstorm to be running with docker compose up from the Server folder."
+    }
+  ]
+}

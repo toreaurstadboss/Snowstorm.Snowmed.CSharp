@@ -1,6 +1,4 @@
 
-using Microsoft.OpenApi;
-
 namespace Snowstorm.Snowmed.Csharp.Client
 {
     public class Program
@@ -11,14 +9,27 @@ namespace Snowstorm.Snowmed.Csharp.Client
 
             // Add services to the container.
             builder.Services.AddAuthorization();
+            builder.Services.AddScoped<IEndpointUtil, EndpointUtil>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            builder.Services.AddOpenApiDocument();
             builder.Services.AddOpenApi();
-
             builder.Services.AddEndpointsApiExplorer();
 
-           
-       
+            var snowstormBaseUrl = builder.Configuration["Snowstorm:BaseUrl"]
+                ?? throw new InvalidOperationException("Snowstorm:BaseUrl is not configured.");
+            var snowstormBranch = builder.Configuration["Snowstorm:Branch"]
+                ?? "MAIN";
+
+            if (!Uri.TryCreate(snowstormBaseUrl, UriKind.Absolute, out var snowstormUri))
+            {
+                throw new InvalidOperationException("Snowstorm:BaseUrl must be an absolute URL.");
+            }
+
+            builder.Services.AddHttpClient<ISnowstormClient, SnowstormClient>(httpClient =>
+            {
+                httpClient.BaseAddress = snowstormUri;
+            });
 
             var app = builder.Build();
 
@@ -29,36 +40,16 @@ namespace Snowstorm.Snowmed.Csharp.Client
 
                 app.UseSwaggerUI(options =>
                 {
-
                     options.SwaggerEndpoint("/openapi/v1.json", "Snowstorm.Snowmed.Csharp.Client v1");
                 });
 
-                //app.MapGet("/", () => TypedResults.Redirect("/swagger"))
-                //    .ExcludeFromDescription();
             }
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-            var summaries = new[]
-            {
-                "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-            };
-
-            app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-            {
-                var forecast = Enumerable.Range(1, 5).Select(index =>
-                    new WeatherForecast
-                    {
-                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = summaries[Random.Shared.Next(summaries.Length)]
-                    })
-                    .ToArray();
-                return forecast;
-            })
-            .WithName("GetWeatherForecast");
+            app.MapConceptEndpoints(snowstormBranch);
 
             app.Run();
         }
