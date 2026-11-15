@@ -1,0 +1,35 @@
+@host = http://localhost:5193
+
+### Search concepts by name
+GET {{host}}/api/concepts?term=diabetes
+Accept: application/json
+
+### Search concepts by identifier case 2 (cauliflower ear)
+GET {{host}}/api/concepts?term=28072004
+Accept: application/json
+
+###
+
+### Search for hypertension
+GET {{host}}/api/concepts?term=hypertension
+Accept: application/json
+
+###
+
+### Get a concept by identifier
+GET {{host}}/api/concepts/73211009
+Accept: application/json
+
+###
+
+### A concept identifier with no active match returns 404 Not Found
+GET {{host}}/api/concepts/999999999
+Accept: application/json
+
+###
+
+### A missing term returns 400 Bad Request
+GET {{host}}/api/concepts
+Accept: application/json
+
+###
