@@ -31,6 +31,22 @@ public sealed class ConceptEndpointsTests
         _factory.Dispose();
     }
 
+    [SetUp]
+    public void Setup()
+    {
+        TestContext.Out.WriteLine(
+         """
+         Snowstorm - LocalDEV - Integration test
+         snowstorm-1    |          ____                          _
+         snowstorm-1    |  __/\__ / ___| _ __   _____      _____| |_ ___  _ __ _ __ ___
+         snowstorm-1    |  \_\/_/ \___ \| '_ \ / _ \ \ /\ / / __| __/ _ \| '__| '_ ` _ \
+         snowstorm-1    |  /_/\_\  ___) | | | | (_) \ V  V /\__ \ || (_) | |  | | | | | |
+         snowstorm-1    |    \/   |____/|_| |_|\___/ \_/\_/ |___/\__\___/|_|  |_| |_| |_|
+         snowstorm-1    | ===============================================================
+
+         """);
+    }
+
     [Test]
     public async Task GetConceptById_ReturnsMatchingNameAndIdentifier()
     {
