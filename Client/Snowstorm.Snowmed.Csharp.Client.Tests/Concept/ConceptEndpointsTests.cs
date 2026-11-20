@@ -1,34 +1,38 @@
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.Framework;
+using Snowstorm.Snowmed.Csharp.ApiClient;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using NUnit.Framework;
-using Snowstorm.Snowmed.Csharp.Client;
 
 namespace Snowstorm.Snowmed.Csharp.Client.Tests;
 
 [TestFixture]
 public sealed class ConceptEndpointsTests
 {
-    private WebApplicationFactory<Program> _factory = null!;
+
     private HttpClient _client = null!;
+    private SnowstormApiClient _apiClient = null!;
+    private WebApplicationFactory<Program> _factory = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        TestContext.Progress.WriteLine(
+        TestContext.Out.WriteLine(
             "Snowstorm must be running before these integration tests. From the Server folder, run \"docker compose up\".");
 
         _factory = new WebApplicationFactory<Program>();
         _client = _factory.CreateClient();
+        _apiClient = new SnowstormApiClient(_client);
     }
 
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
         _client.Dispose();
-        _factory.Dispose();
+        _apiClient = null!;
     }
 
     [SetUp]
@@ -50,20 +54,40 @@ public sealed class ConceptEndpointsTests
     [Test]
     public async Task GetConceptById_ReturnsMatchingNameAndIdentifier()
     {
-        var response = await _client.GetAsync("/api/concepts/73211009");
+        var concept = await _apiClient.GetConceptByIdAsync("73211009");
+        concept.Should().BeEquivalentTo(new ConceptResponse("Diabetes mellitus", "73211009"));
+    }
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var concept = await response.Content.ReadFromJsonAsync<ConceptResponse>();
-
-        concept.Should().Be(new ConceptResponse("Diabetes mellitus", "73211009"));
+    [Test]
+    [TestCase("Diabetes")]
+    public async Task SearchConcepts_ReturnsResultContainingMatchingNameAndIdentifier(string term)
+    {
+        var concepts = await _apiClient.SearchConceptsAsync(term);
+        concepts.Should().NotBeNullOrEmpty();
+        concepts.Should().Contain(concept =>
+            concept.ConceptId == "73211009"
+            && concept.Name == "Diabetes mellitus");
+        TestContext.Out.WriteLine("Found {0} concepts matching term '{1}'", concepts.Count, term);
     }
 
     [Test]
     public async Task GetConceptById_ReturnsNotFound_WhenConceptDoesNotExist()
     {
-        var response = await _client.GetAsync("/api/concepts/999999999");
+        var act = async () => await _apiClient.GetConceptByIdAsync("999999999");
+        var exception = await act.Should().ThrowAsync<Snowstorm.Snowmed.Csharp.ApiClient.ApiException>();
+        exception.Which.StatusCode.Should().Be(404);
+    }
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    [Test]
+    public async Task GetConceptDescriptions_ReturnsExpected_WhenConceptDoesExist()
+    {
+        var conceptDescriptions = await _apiClient.GetConceptDescriptionsByIdAsync("73211009");    
+        conceptDescriptions.Should().NotBeNull();
+        conceptDescriptions.Should().Contain(description =>
+            description.ConceptId == "73211009"
+            && description.DescriptionId == "813575016"
+            && description.Term == "Diabetes mellitus (disorder)"
+            && description.Type == "FSN");
     }
 
     [Test]

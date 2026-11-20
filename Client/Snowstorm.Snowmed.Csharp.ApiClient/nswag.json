@@ -1,0 +1,27 @@
+{
+  "runtime": "Net100",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "$(OpenApiUrl)"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "SnowstormApiClient",
+      "namespace": "Snowstorm.Snowmed.Csharp.ApiClient",
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "injectHttpClient": true,
+      "disposeHttpClient": false,
+      "useBaseUrl": false,
+      "generateBaseUrlProperty": false,
+      "generateOptionalParameters": true,
+      "operationGenerationMode": "SingleClientFromOperationId",
+      "jsonLibrary": "SystemTextJson",
+      "classStyle": "Record",
+      "generateNativeRecords": true,
+      "output": "SnowstormApiClient.cs"
+    }
+  }
+}

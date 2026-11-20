@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	<PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Snowstorm.Snowmed.Csharp.ApiClient\Snowstorm.Snowmed.Csharp.ApiClient.csproj" />
     <ProjectReference Include="..\Snowstorm.Snowmed.Csharp.Client\Snowstorm.Snowmed.Csharp.Client.csproj" />
   </ItemGroup>
 

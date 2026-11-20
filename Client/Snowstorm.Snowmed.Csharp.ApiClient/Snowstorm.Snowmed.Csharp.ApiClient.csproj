@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OpenApiUrl Condition="'$(OpenApiUrl)' == ''">https://localhost:7130/openapi/v1.json</OpenApiUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NSwag.MSBuild" Version="14.8.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <Target Name="GenerateApiClient">
+    <Exec
+      WorkingDirectory="$(MSBuildProjectDirectory)"
+      Command="$(NSwagExe_Net100) run nswag.json /variables:OpenApiUrl=$(OpenApiUrl)" />
+  </Target>
+
+</Project>
