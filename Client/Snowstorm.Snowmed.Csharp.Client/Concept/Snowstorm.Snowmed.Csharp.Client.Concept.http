@@ -8,7 +8,9 @@ Accept: application/json
 GET {{host}}/api/concepts?term=28072004
 Accept: application/json
 
-###
+### Search for descriptions of a concept by identifier ALS - Amyotrophic lateral sclerosis
+GET {{host}}/api/concepts/86044005/descriptions
+Accept: application/json
 
 ### Search for hypertension
 GET {{host}}/api/concepts?term=hypertension

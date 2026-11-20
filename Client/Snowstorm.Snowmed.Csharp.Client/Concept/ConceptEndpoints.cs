@@ -1,13 +1,7 @@
 using System.ComponentModel;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Snowstorm.Snowmed.Csharp.Client;
-
-/// <summary>
-/// Represents a concept name and its SNOMED CT identifier.
-/// </summary>
-public sealed record ConceptResponse(string Name, string ConceptId);
 
 /// <summary>
 /// Maps concept search and lookup endpoints.
@@ -37,7 +31,7 @@ public static class ConceptEndpoints
                 {
                     return await endpointUtil.SearchByTermAsync(
                         term,
-                        (searchTerm, token) => SearchConceptsAsync(
+                        (searchTerm, token) => ConceptEndpointsHelper.SearchConceptsAsync(
                             snowstormClient,
                             branch,
                             searchTerm,
@@ -56,7 +50,7 @@ public static class ConceptEndpoints
                     ISnowstormClient snowstormClient,
                     CancellationToken cancellationToken) =>
                 {
-                    var concept = await GetConceptByIdAsync(
+                    var concept = await ConceptEndpointsHelper.GetConceptByIdAsync(
                         snowstormClient,
                         branch,
                         conceptId,
@@ -67,93 +61,27 @@ public static class ConceptEndpoints
                         : TypedResults.Ok(concept);
                 });
 
+        app.MapGet(
+            "/api/concepts/{conceptId}/descriptions",
+            [EndpointName("GetConceptDescriptionsById")]
+            [EndpointSummary("Get concept descriptions by identifier")]
+            async Task<Results<Ok<IReadOnlyList<ConceptDescriptionResponse>>, BadRequest<string>>> (string conceptId,
+            ISnowstormClient snowstormClient,
+            IEndpointUtil endpointUtil,
+            CancellationToken cancellationToken) =>
+            {
+                var concepts = await endpointUtil.SearchByTermAsync(
+                    conceptId,
+                    (searchTerm, token) => ConceptEndpointsHelper.SearchConceptDescriptionsAsync(
+                        snowstormClient,
+                        branch,
+                        searchTerm,
+                        token),
+                    cancellationToken);
+                return concepts;
+            }
+        );
+
         return app;
-    }
-
-    private static async Task<IReadOnlyList<ConceptResponse>> SearchConceptsAsync(
-        ISnowstormClient snowstormClient,
-        string branch,
-        string term,
-        CancellationToken cancellationToken)
-    {
-        var searchResult = await QueryConceptsAsync(
-            snowstormClient,
-            branch,
-            term,
-            conceptIds: null,
-            limit: 100,
-            cancellationToken);
-
-        return searchResult.Items
-            .Select(MapConcept)
-            .ToArray();
-    }
-
-    private static async Task<ConceptResponse?> GetConceptByIdAsync(
-        ISnowstormClient snowstormClient,
-        string branch,
-        string conceptId,
-        CancellationToken cancellationToken)
-    {
-
-        var searchResult = await QueryConceptsAsync(
-            snowstormClient,
-            branch,
-            term: null,
-            conceptIds: [conceptId],
-            limit: 1,
-            cancellationToken);
-
-        var concept = searchResult.Items.FirstOrDefault();
-        return concept is null ? null : MapConcept(concept);
-    }
-
-    private static Task<ItemsPage> QueryConceptsAsync(
-        ISnowstormClient snowstormClient,
-        string branch,
-        string? term,
-        IEnumerable<string>? conceptIds,
-        int limit,
-        CancellationToken cancellationToken)
-    {
-        return snowstormClient.FindConceptsAsync(
-            branch,
-            activeFilter: true,
-            definitionStatusFilter: null,
-            module: null,
-            term: term,
-            termActive: true,
-            descriptionType: null,
-            language: ["en"],
-            preferredIn: null,
-            acceptableIn: null,
-            preferredOrAcceptableIn: null,
-            ecl: null,
-            effectiveTime: null,
-            isNullEffectiveTime: null,
-            isPublished: null,
-            statedEcl: null,
-            includeLeafFlag: null,
-            form: null,
-            conceptIds: conceptIds,
-            returnIdOnly: false,
-            offset: 0,
-            limit: limit,
-            searchAfter: null,
-            accept_Language: "en",
-            cancellationToken);
-    }
-
-    private static ConceptResponse MapConcept(object item)
-    {
-        var concept = item switch
-        {
-            ConceptMini conceptMini => conceptMini,
-            JsonElement jsonElement => jsonElement.Deserialize<ConceptMini>()
-                ?? throw new InvalidOperationException("Snowstorm returned an empty concept."),
-            _ => throw new InvalidOperationException("Snowstorm returned a concept in an unexpected format.")
-        };
-
-        return new ConceptResponse(concept.Pt.Term, concept.ConceptId);
     }
 }
