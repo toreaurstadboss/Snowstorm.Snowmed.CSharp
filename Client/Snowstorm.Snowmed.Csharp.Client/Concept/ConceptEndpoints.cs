@@ -29,7 +29,7 @@ public static class ConceptEndpoints
                     IEndpointUtil endpointUtil,
                     CancellationToken cancellationToken) =>
                 {
-                    return await endpointUtil.SearchByTermAsync(
+                    return await endpointUtil.GetListAsync(
                         term,
                         (searchTerm, token) => ConceptEndpointsHelper.SearchConceptsAsync(
                             snowstormClient,
@@ -70,7 +70,7 @@ public static class ConceptEndpoints
             IEndpointUtil endpointUtil,
             CancellationToken cancellationToken) =>
             {
-                var concepts = await endpointUtil.SearchByTermAsync(
+                var concepts = await endpointUtil.GetListAsync(
                     conceptId,
                     (searchTerm, token) => ConceptEndpointsHelper.SearchConceptDescriptionsAsync(
                         snowstormClient,

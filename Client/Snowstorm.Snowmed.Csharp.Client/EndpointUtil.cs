@@ -15,7 +15,7 @@ public interface IEndpointUtil
     /// <param name="searchAsync">The search operation to execute for a valid term.</param>
     /// <param name="cancellationToken">The token used to cancel the search.</param>
     /// <returns>A bad request for a missing term or the search results.</returns>
-    Task<Results<Ok<IReadOnlyList<TResponse>>, BadRequest<string>>> SearchByTermAsync<TResponse>(
+    Task<Results<Ok<IReadOnlyList<TResponse>>, BadRequest<string>>> GetListAsync<TResponse>(
         string? term,
         Func<string, CancellationToken, Task<IReadOnlyList<TResponse>>> searchAsync,
         CancellationToken cancellationToken);
@@ -26,7 +26,7 @@ public interface IEndpointUtil
 /// </summary>
 public sealed class EndpointUtil : IEndpointUtil
 {
-    public async Task<Results<Ok<IReadOnlyList<TResponse>>, BadRequest<string>>> SearchByTermAsync<TResponse>(
+    public async Task<Results<Ok<IReadOnlyList<TResponse>>, BadRequest<string>>> GetListAsync<TResponse>(
         string? term,
         Func<string, CancellationToken, Task<IReadOnlyList<TResponse>>> searchAsync,
         CancellationToken cancellationToken)
